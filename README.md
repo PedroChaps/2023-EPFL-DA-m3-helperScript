@@ -3,7 +3,7 @@ A helper script to test the performance and look for bugs for the 3rd delivery o
 
 # Demo
 
-![Video demo](readmeMedia/videoDemo.mp4)
+![Video demo](readmeMedia/videoDemo.gif)
 ![Not Comparable demo](readmeMedia/notComparable.png)
 ![Standard Error demo](readmeMedia/stderr.png)
 
