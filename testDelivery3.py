@@ -174,6 +174,7 @@ def checkValidity_and_count(args, initial_time):
                     print(color.RED + f"------------------------------------------------------------" + color.END)
                     print(color.RED + f"Error: The sets are not all subsets or superset of eachother" + color.END)
                     print(color.RED + f"------------------------------------------------------------" + color.END)
+                    print(color.RED + f"{files_lines = }" + color.END)
                     print(color.RED + f"{sets = }" + color.END)
                     print(color.RED + f"{sets[i] = }" + color.END)
                     print(color.RED + f"{sets[j] = }" + color.END)
@@ -213,39 +214,44 @@ if __name__ == "__main__":
     print(color.GREEN + f"Starting stress test for delivery3 at {datetime.fromtimestamp(initial_time).strftime('%Y-%m-%d %H:%M:%S')}" + color.END)
     print(color.GREEN + f"---------------------------------------------------------" + color.END)
     
-    
-    testConfig = {
-        "concurrency": 8,  # How many threads are interferring with the running processes
-        "attempts": 6,  # How many interferring attempts each threads does
-        "attemptsDistribution": {  # Probability with which an interferring thread will
-            #"STOP": 0.48,  # select an interferring action (make sure they add up to 1)
-            #"CONT": 0.48,
-            #"TERM": 0.04,
-            #"STOP": 0.4,  # select an interferring action (make sure they add up to 1)
-            #"CONT": 0.4,
-            #"TERM": 0.1,            
-            "STOP": 0.5,  # select an interferring action (make sure they add up to 1)
-            "CONT": 0.5,
-            "TERM": 0.0,            
-        },
-    }
-    
     args = do_parsing()
     
     print(color.DARKCYAN + "Running stress test for delivery3..." + color.END)
     print(color.DARKCYAN + "PLEASE DON'T TOUCH ANYTHING, THIS WILL FINISH AUTOMATICALLY AFTER THE TIME ENDS" + color.END)
     print()
     
+    """
     #try:
-    subprocess.run(
-        f"mkdir -p {args.logsDir}; /bin/rm -fr {args.logsDir}/*; timeout {args.duration}s ./stress.py agreement -r ../template_cpp/run.sh -l {args.logsDir} -p {args.processes} -n {args.proposals} -v {args.proposal_max_values} -d {args.proposals_distinct_values}",
+    process = subprocess.run(
+        f"mkdir -p stress_delivery3; /bin/rm -fr stress_delivery3/*; timeout {args.duration}s ./stress.py agreement -r ../template_cpp/run.sh -l stress_delivery3 -p {args.processes} -n {args.proposals} -v {args.proposal_max_values} -d {args.proposals_distinct_values}",
         shell=True,
-        capture_output=True,
-        text=True,
+        #capture_output=True,
+        #text=True,
         #check=True
     )
     #except subprocess.CalledProcessError as e:
     #    print(f"Command failed with error: {e}")
+    """
+    
+    subprocess.run(
+        f"mkdir -p stress_delivery3", shell=True,
+    )
+    subprocess.run(
+        f"/bin/rm -fr stress_delivery3/*", shell=True,
+    )
+    process = subprocess.Popen(
+        f"./stress.py agreement -r ../template_cpp/run.sh -l stress_delivery3 -p {args.processes} -n {args.proposals} -v {args.proposal_max_values} -d {args.proposals_distinct_values}", 
+        shell=True, 
+        stdin=subprocess.PIPE,
+        #stdout=subprocess.PIPE,
+    )
+    
+    # Sleeps for the duration of the test (minus the time it took to start the test)
+    while time.time() - initial_time < args.duration:
+        time.sleep(1)
+        if round(time.time() - initial_time) > 15:
+            print(f"Time elapsed: {round(time.time() - initial_time)}/{args.duration} seconds")
+    process.communicate(input=b'\n')
     
     
     print()
